@@ -18,13 +18,13 @@ import java.util.List;
 @NoArgsConstructor @AllArgsConstructor
 public class BankAccount {
     @Id
-
-    private String id;
-    private double balance;
-    private Date createAt;
-    private AccountStatus status;
+    protected String id;
+    protected double balance;
+    protected Date createAt;
+    @Enumerated(EnumType.STRING)
+    protected AccountStatus status;
     @ManyToOne
-    private Customer customer;
+    protected Customer customer;
     @OneToMany(mappedBy = "bankAccount")
-    private List<AccountOperation> accountOperations;
+    protected List<AccountOperation> accountOperations;
 }
