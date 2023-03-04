@@ -124,7 +124,7 @@ class BankAccountServiceImplTestForCustomers {
         then(bankAccountMapper).shouldHaveNoInteractions();
     }
     @Test
-    void itShouldUpdateCustomer() {
+    void itShouldUpdateCustomer() throws CustomerNotFoundException {
         //GIVEN
         Customer customer = new Customer(1L,
                 "mohamed",
@@ -146,7 +146,7 @@ class BankAccountServiceImplTestForCustomers {
     }
 
     @Test
-    void itShouldDeleteCustomer() {
+    void itShouldDeleteCustomer() throws CustomerNotFoundException {
         //GIVEN
         long customerId= 1L;
         //WHEN
