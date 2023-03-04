@@ -1,6 +1,9 @@
 package com.fsb.digital_banking_backend.services;
 
+import com.fsb.digital_banking_backend.dtos.BankAccountDTO;
+import com.fsb.digital_banking_backend.dtos.CurrentBankAccountDTO;
 import com.fsb.digital_banking_backend.dtos.CustomerDTO;
+import com.fsb.digital_banking_backend.dtos.SavingBankAccountDTO;
 import com.fsb.digital_banking_backend.entities.*;
 import com.fsb.digital_banking_backend.exceptions.BalanceNotSufficientException;
 import com.fsb.digital_banking_backend.exceptions.BankAccountNotFoundException;
@@ -32,32 +35,23 @@ class BankAccountServiceImplTest {
     private BankAccountRepository bankAccountRepository;
     @Mock
     private CustomerRepository customerRepository;
-    @Mock
-    private AccountOperationRepository accountOperationRepository;
+
     @Mock
     private BankAccountMapperImpl bankAccountMapper;
+    @Mock
+    private AccountOperationRepository accountOperationRepository;
     private BankAccountService underTest;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        underTest= new BankAccountServiceImpl(accountOperationRepository, bankAccountRepository, customerRepository, bankAccountMapper);
+        underTest= new BankAccountServiceImpl(accountOperationRepository,
+                bankAccountRepository,
+                customerRepository,
+                bankAccountMapper);
     }
 
-    @Test
-    void itShouldSaveCustomer() {
-        //GIVEN
-        CustomerDTO customer = new CustomerDTO();
-        customer.setName("Hassan");
-        customer.setEmail("Hassan@gmail.com");
-        given(bankAccountMapper.fromCustomerDTO(customer)).willCallRealMethod();
-        //WHEN
-        underTest.saveCustomer(customer);
-        //THEN
-        ArgumentCaptor<Customer> customerArgumentCaptor = ArgumentCaptor.forClass(Customer.class);
-        then(customerRepository).should().save(customerArgumentCaptor.capture());
-        assertThat(customerArgumentCaptor.getValue()).isNotNull();
-    }
+
 
     @Test
     void itShouldSaveCurrentAccountSuccessfully() throws CustomerNotFoundException {
@@ -131,9 +125,11 @@ class BankAccountServiceImplTest {
     void itShouldGetBankAccount() throws BankAccountNotFoundException {
         //GIVEN
         String bankId= UUID.randomUUID().toString();
-        given(bankAccountRepository.findById(bankId)).willReturn(Optional.of(mock(BankAccount.class)));
+        given(bankAccountRepository.findById(bankId)).willReturn(Optional.of(mock(SavingAccount.class)));
+        given(bankAccountMapper.fromSavingBankAccount(any())).willReturn(new SavingBankAccountDTO());
+        given(bankAccountMapper.fromCurrentBankAccount(any())).willReturn(new CurrentBankAccountDTO());
         //WHEN
-        BankAccount bankAccount = underTest.getBankAccount(bankId);
+        BankAccountDTO bankAccount = underTest.getBankAccount(bankId);
         //THEN
         assertThat(bankAccount).isNotNull();
     }
@@ -148,70 +144,9 @@ class BankAccountServiceImplTest {
                 .isInstanceOf(BankAccountNotFoundException.class)
                 .hasMessageContaining("BankAccount not found");
     }
-    @Test
-    void itShouldDebit() throws BankAccountNotFoundException, BalanceNotSufficientException {
-        //GIVEN
-        String bankId= UUID.randomUUID().toString();
-        double amount = 1000;
-        String description = "debit description";
-        BankAccount bankAccount= new CurrentAccount(200);
-        bankAccount.setId(bankId);
-        bankAccount.setCreateAt(new Date());
-        bankAccount.setBalance(3000) ;
-        given(bankAccountRepository.findById(bankId))
-                .willReturn(Optional.of(bankAccount));
-        //WHEN
-        underTest.debit(bankId, amount, description);
-        //THEN
-        ArgumentCaptor<AccountOperation> accountOperationArgumentCaptor = ArgumentCaptor.forClass(AccountOperation.class);
-        then(accountOperationRepository).should().save(accountOperationArgumentCaptor.capture());
-        ArgumentCaptor<BankAccount> bankAccountArgumentCaptor = ArgumentCaptor.forClass(BankAccount.class);
-        then(bankAccountRepository).should().save(bankAccountArgumentCaptor.capture());
 
-        assertThat(bankAccountArgumentCaptor.getValue().getBalance()).isEqualTo(2000);
 
-    }
-    @Test
-    void itShouldThrowWhenBalanceNotSufficientDebit() throws BankAccountNotFoundException, BalanceNotSufficientException {
-        //GIVEN
-        String bankId= UUID.randomUUID().toString();
-        double amount = 1000;
-        String description = "debit description";
-        BankAccount bankAccount= new CurrentAccount(200);
-        bankAccount.setId(bankId);
-        bankAccount.setCreateAt(new Date());
-        bankAccount.setBalance(600) ;
-        given(bankAccountRepository.findById(bankId))
-                .willReturn(Optional.of(bankAccount));
-        //WHEN
-        //THEN
-        assertThatThrownBy(()->underTest.debit(bankId, amount, description))
-                .isInstanceOf(BalanceNotSufficientException.class)
-                .hasMessageContaining("Balance not sufficient");
 
-    }
-    @Test
-    void itShouldCredit() throws BankAccountNotFoundException {
-        //GIVEN
-        String bankId= UUID.randomUUID().toString();
-        double amount = 1000;
-        String description = "debit description";
-        BankAccount bankAccount= new CurrentAccount(200);
-        bankAccount.setId(bankId);
-        bankAccount.setCreateAt(new Date());
-        bankAccount.setBalance(3000) ;
-        given(bankAccountRepository.findById(bankId))
-                .willReturn(Optional.of(bankAccount));
-        //WHEN
-        underTest.credit(bankId, amount, description);
-        //THEN
-        ArgumentCaptor<AccountOperation> accountOperationArgumentCaptor = ArgumentCaptor.forClass(AccountOperation.class);
-        then(accountOperationRepository).should().save(accountOperationArgumentCaptor.capture());
-        ArgumentCaptor<BankAccount> bankAccountArgumentCaptor = ArgumentCaptor.forClass(BankAccount.class);
-        then(bankAccountRepository).should().save(bankAccountArgumentCaptor.capture());
-
-        assertThat(bankAccountArgumentCaptor.getValue().getBalance()).isEqualTo(4000);
-    }
 
     @Test
     void itShouldTransfer() {

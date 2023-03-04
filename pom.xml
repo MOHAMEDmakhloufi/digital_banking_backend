@@ -54,6 +54,15 @@
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- localhost:8080/swagger-ui.html-->
+        <!-- localhost:8080/v3/api-docs-->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-ui</artifactId>
+            <version>1.6.8</version>
+
+        </dependency>
+
     </dependencies>
 
     <build>

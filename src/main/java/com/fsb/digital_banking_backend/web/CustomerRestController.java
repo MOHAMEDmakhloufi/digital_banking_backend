@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("customers")
 @Slf4j
 public class CustomerRestController {
     private final BankAccountService bankAccountService;
@@ -19,9 +19,10 @@ public class CustomerRestController {
     public CustomerRestController(BankAccountService bankAccountService) {
         this.bankAccountService = bankAccountService;
     }
+
     @GetMapping("")
     public List<CustomerDTO> customers(){
-        return bankAccountService.ListCustomers();
+        return bankAccountService.listOfCustomers();
     }
     @GetMapping("/{id}")
     public CustomerDTO getCustomer(@PathVariable(name = "id")  Long customerId)
@@ -34,12 +35,12 @@ public class CustomerRestController {
         return bankAccountService.saveCustomer(customerDTO);
     }
     @PutMapping("/put/{customerId}")
-    public CustomerDTO updateCustomer(@PathVariable Long customerId, @RequestBody CustomerDTO customerDTO){
+    public CustomerDTO updateCustomer(@PathVariable Long customerId, @RequestBody CustomerDTO customerDTO) throws CustomerNotFoundException {
         customerDTO.setId(customerId);
         return bankAccountService.updateCustomer(customerDTO);
     }
     @DeleteMapping("/delete/{id}")
-    public void deleteCustomer(@PathVariable(name = "id") Long customerId){
+    public void deleteCustomer(@PathVariable(name = "id") Long customerId) throws CustomerNotFoundException {
         bankAccountService.deleteCustomer(customerId);
     }
 }

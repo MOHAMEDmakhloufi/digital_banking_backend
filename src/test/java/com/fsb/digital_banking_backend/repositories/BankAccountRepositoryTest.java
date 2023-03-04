@@ -39,13 +39,13 @@ class BankAccountRepositoryTest {
     void itShouldSaveCurrentAccount() {
         //GIVEN
         Customer customer = new Customer(1L, "Hassan", "Hassan@gmail.com", null);
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
         CurrentAccount currentAccount = new CurrentAccount();
         currentAccount.setId(UUID.randomUUID().toString());
         currentAccount.setBalance(Math.random()*90000);
         currentAccount.setCreateAt(new Date());
         currentAccount.setStatus(AccountStatus.CREATED);
-        currentAccount.setCustomer(customer);
+        currentAccount.setCustomer(savedCustomer);
         currentAccount.setOverDraft(9000);
 
         //WHEN
@@ -59,13 +59,13 @@ class BankAccountRepositoryTest {
     void itShouldSaveSavingAccount() {
         //GIVEN
         Customer customer = new Customer(1L, "Hassan", "Hassan@gmail.com", null);
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
         SavingAccount savingAccount = new SavingAccount();
         savingAccount.setId(UUID.randomUUID().toString());
         savingAccount.setBalance(Math.random()*90000);
         savingAccount.setCreateAt(new Date());
         savingAccount.setStatus(AccountStatus.CREATED);
-        savingAccount.setCustomer(customer);
+        savingAccount.setCustomer(savedCustomer);
         savingAccount.setInterestRate(9000);
         underTest.save(savingAccount);
 
