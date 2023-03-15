@@ -2,6 +2,7 @@ package com.fsb.digital_banking_backend.services;
 
 import com.fsb.digital_banking_backend.dtos.*;
 import com.fsb.digital_banking_backend.entities.*;
+import com.fsb.digital_banking_backend.enums.AccountStatus;
 import com.fsb.digital_banking_backend.enums.OperationType;
 import com.fsb.digital_banking_backend.exceptions.AmountNotVallidException;
 import com.fsb.digital_banking_backend.exceptions.BalanceNotSufficientException;
@@ -104,6 +105,7 @@ public class BankAccountServiceImpl implements BankAccountService {
         bankAccount.setCreateAt(new Date());
         bankAccount.setBalance(initialBalance);
         bankAccount.setCustomer(customer);
+        bankAccount.setStatus(AccountStatus.CREATED);
         BankAccount savedBank = bankAccountRepository.save(bankAccount);
         if (bankAccount instanceof CurrentAccount)
             return bankAccountMapper.fromCurrentBankAccount((CurrentAccount) savedBank);
@@ -215,4 +217,14 @@ public class BankAccountServiceImpl implements BankAccountService {
         accountHistoryDTO.setTotalPages(accountOperations.getTotalPages());
         return accountHistoryDTO;
     }
+
+    @Override
+    public List<CustomerDTO> searchCustomers(String keyWord) {
+
+        List<Customer> customers = customerRepository.findCustomerByNameContains(keyWord);
+
+        List<CustomerDTO> customersDTO = customers.stream().map(customer -> bankAccountMapper.fromCustomer(customer)).collect(Collectors.toList());
+        return customersDTO;
+    }
+
 }

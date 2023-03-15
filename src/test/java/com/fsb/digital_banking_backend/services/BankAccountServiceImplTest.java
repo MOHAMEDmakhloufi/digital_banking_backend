@@ -5,6 +5,7 @@ import com.fsb.digital_banking_backend.dtos.CurrentBankAccountDTO;
 import com.fsb.digital_banking_backend.dtos.CustomerDTO;
 import com.fsb.digital_banking_backend.dtos.SavingBankAccountDTO;
 import com.fsb.digital_banking_backend.entities.*;
+import com.fsb.digital_banking_backend.enums.AccountStatus;
 import com.fsb.digital_banking_backend.exceptions.BalanceNotSufficientException;
 import com.fsb.digital_banking_backend.exceptions.BankAccountNotFoundException;
 import com.fsb.digital_banking_backend.exceptions.CustomerNotFoundException;
@@ -71,7 +72,7 @@ class BankAccountServiceImplTest {
         bankAccount.setId(UUID.randomUUID() .toString());
         bankAccount.setCreateAt(new Date());
         bankAccount.setBalance(initialBalance) ;
-
+        bankAccount.setStatus(AccountStatus.CREATED);
         assertThat(bankAccountArgumentCaptor.getValue())
                 .isInstanceOf(CurrentAccount.class)
                 .isEqualToIgnoringGivenFields(bankAccount, "id", "customer", "createAt");
@@ -96,7 +97,7 @@ class BankAccountServiceImplTest {
         bankAccount.setId(UUID.randomUUID() .toString());
         bankAccount.setCreateAt(new Date());
         bankAccount.setBalance(initialBalance) ;
-
+        bankAccount.setStatus(AccountStatus.CREATED);
         assertThat(bankAccountArgumentCaptor.getValue())
                 .isInstanceOf(SavingAccount.class)
                 .isEqualToIgnoringGivenFields(bankAccount, "id", "customer", "createAt");

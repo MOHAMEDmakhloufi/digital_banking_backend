@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,22 +45,33 @@ public class IntegrationTests {
         double initialBalance = 5000;
         String type = "current";
         double paramType = 500;
+        //user
+        String username= "admin";
+        String password= "1234";
         //WHEN
+            //Authentication
+        ResultActions authenticationAction = mockMvc.perform(post(
+                String.format("/login?username=%s&password=%s",username, password )));
+        Map<String, String> token = jsonToMap(authenticationAction.andReturn().getResponse().getContentAsString());
+
             //create new customer
         ResultActions customerRegistrationAction = mockMvc.perform(post("/customers/save")
+                .header("Authorization", "Bearer "+ token.get("access-token"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Objects.requireNonNull(objectToJson(customerDTO))));
 
             //create two account
         ResultActions currentAccountRegistrationAction = mockMvc.perform(
-                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId));
+                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId)
+                .header("Authorization", "Bearer "+ token.get("access-token")));
         CurrentBankAccountDTO currentAccount = jsonToCurrentAccount(currentAccountRegistrationAction
                 .andReturn()
                 .getResponse()
                 .getContentAsString()
         );
         ResultActions currentAccount2RegistrationAction = mockMvc.perform(
-                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId));
+                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId)
+                .header("Authorization", "Bearer "+ token.get("access-token")));
 
         CurrentBankAccountDTO currentAccount2 = jsonToCurrentAccount(currentAccount2RegistrationAction
                 .andReturn()
@@ -68,10 +80,12 @@ public class IntegrationTests {
         );
             //create account operation
         ResultActions transferAction = mockMvc.perform(
-                post(String.format("/accounts/transfer/{from}/{to}?amount=%s", 1000), currentAccount.getId(), currentAccount2.getId()));
+                post(String.format("/accounts/transfer/{from}/{to}?amount=%s", 1000), currentAccount.getId(), currentAccount2.getId())
+                .header("Authorization", "Bearer "+ token.get("access-token")));
 
 
         //THEN
+
         customerRegistrationAction.andExpect(status().isOk());
         currentAccountRegistrationAction.andExpect(status().isOk());
         currentAccount2RegistrationAction.andExpect(status().isOk());
@@ -90,15 +104,25 @@ public class IntegrationTests {
         double initialBalance = 800;
         String type = "current";
         double paramType = 500;
+        //user
+        String username= "admin";
+        String password= "1234";
         //WHEN
+        //Authentication
+        ResultActions authenticationAction = mockMvc.perform(post(
+                String.format("/login?username=%s&password=%s",username, password )));
+        Map<String, String> token = jsonToMap(authenticationAction.andReturn().getResponse().getContentAsString());
+
         //create new customer
         ResultActions customerRegistrationAction = mockMvc.perform(post("/customers/save")
+                .header("Authorization", "Bearer "+ token.get("access-token"))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(Objects.requireNonNull(objectToJson(customerDTO))));
 
         //create two account
         ResultActions currentAccountRegistrationAction = mockMvc.perform(
-                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId));
+                post(String.format("/accounts/save/{customerId}?initialBalance=%s&type=%s&money=%s", initialBalance, type, paramType), customerId)
+                        .header("Authorization", "Bearer "+ token.get("access-token")));
         CurrentBankAccountDTO currentAccount = jsonToCurrentAccount(currentAccountRegistrationAction
                 .andReturn()
                 .getResponse()
@@ -108,7 +132,8 @@ public class IntegrationTests {
         //create account operation
 
         ResultActions test_debit = mockMvc.perform(
-                post(String.format("/accounts/debit/{accountId}?amount=%s&description=%s", 4000, "test debit"), currentAccount.getId()));
+                post(String.format("/accounts/debit/{accountId}?amount=%s&description=%s", 4000, "test debit"), currentAccount.getId())
+                        .header("Authorization", "Bearer "+ token.get("access-token")));
 
 
         //THEN
@@ -133,6 +158,16 @@ public class IntegrationTests {
             return currentAccount;
         }catch (JsonProcessingException e){
             fail("Failed to convert json to CurrentAccount");
+            return null;
+        }
+
+    }
+    private Map<String, String> jsonToMap(String json) {
+        try {
+             Map<String, String> token=new ObjectMapper().readValue(json, Map.class);
+            return token;
+        }catch (JsonProcessingException e){
+            fail("Failed to convert json to token");
             return null;
         }
 

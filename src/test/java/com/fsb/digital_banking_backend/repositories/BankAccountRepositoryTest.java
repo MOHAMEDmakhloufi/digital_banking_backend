@@ -1,5 +1,6 @@
 package com.fsb.digital_banking_backend.repositories;
 
+import com.fsb.digital_banking_backend.entities.BankAccount;
 import com.fsb.digital_banking_backend.entities.CurrentAccount;
 import com.fsb.digital_banking_backend.entities.Customer;
 import com.fsb.digital_banking_backend.entities.SavingAccount;
@@ -40,19 +41,20 @@ class BankAccountRepositoryTest {
         //GIVEN
         Customer customer = new Customer(1L, "Hassan", "Hassan@gmail.com", null);
         Customer savedCustomer = customerRepository.save(customer);
-        CurrentAccount currentAccount = new CurrentAccount();
+        BankAccount currentAccount = new CurrentAccount(9000);
         currentAccount.setId(UUID.randomUUID().toString());
         currentAccount.setBalance(Math.random()*90000);
         currentAccount.setCreateAt(new Date());
         currentAccount.setStatus(AccountStatus.CREATED);
         currentAccount.setCustomer(savedCustomer);
-        currentAccount.setOverDraft(9000);
+
 
         //WHEN
-        CurrentAccount currentAccountSaved = underTest.save(currentAccount);
+        BankAccount currentAccountSaved = underTest.save(currentAccount);
         //THEN
         assertThat(currentAccountSaved)
                 .isEqualToComparingFieldByField(currentAccount);
+        assertThat(currentAccountSaved.getStatus()).isEqualTo(AccountStatus.CREATED);
     }
 
     @Test
@@ -60,19 +62,20 @@ class BankAccountRepositoryTest {
         //GIVEN
         Customer customer = new Customer(1L, "Hassan", "Hassan@gmail.com", null);
         Customer savedCustomer = customerRepository.save(customer);
-        SavingAccount savingAccount = new SavingAccount();
+        BankAccount savingAccount = new SavingAccount(9000);
         savingAccount.setId(UUID.randomUUID().toString());
         savingAccount.setBalance(Math.random()*90000);
         savingAccount.setCreateAt(new Date());
         savingAccount.setStatus(AccountStatus.CREATED);
         savingAccount.setCustomer(savedCustomer);
-        savingAccount.setInterestRate(9000);
+
         underTest.save(savingAccount);
 
         //WHEN
-        SavingAccount savingAccountSaved = underTest.save(savingAccount);
+        BankAccount savingAccountSaved = underTest.save(savingAccount);
         //THEN
         assertThat(savingAccountSaved)
                 .isEqualToComparingFieldByField(savingAccount);
+        assertThat(savingAccountSaved.getStatus()).isEqualTo(AccountStatus.CREATED);
     }
 }
