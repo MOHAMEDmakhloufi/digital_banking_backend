@@ -27,15 +27,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             filterChain.doFilter(httpServletRequest, httpServletResponse);
         }else {
             String authorizationToken= httpServletRequest.getHeader("Authorization");
-            if(authorizationToken!=null)
-                System.out.println("Authorization is true");
-            else
-                System.out.println(httpServletRequest.getHeader("med"));
-            StringBuilder sb = new StringBuilder();
-            httpServletRequest.getHeaderNames().asIterator().forEachRemaining(headerName -> {
-                sb.append(headerName).append(": ").append(httpServletRequest.getHeader(headerName)).append("\n");
-            });
-            System.out.println(sb.toString());
+
             if(authorizationToken!=null && authorizationToken.startsWith("Bearer ")){
                 try{
                     String jwt= authorizationToken.substring(7);
